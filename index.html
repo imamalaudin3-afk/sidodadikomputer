@@ -1,0 +1,1100 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Search, MapPin, Phone, Mail, ChevronRight, ChevronLeft, 
+  Menu, X, Laptop, Monitor, Printer, Keyboard, HardDrive, 
+  Wrench, CheckCircle, ShieldCheck, Tag, Zap, Star, 
+  MessageCircle, Scale, XCircle, ArrowRight, Clock, 
+  Map as MapIcon, Instagram, Facebook, Youtube, Share2
+} from 'lucide-react';
+
+// ==========================================
+// DUMMY DATA SETTINGS
+// ==========================================
+const STORE_INFO = {
+  name: "Sidodadi Komputer Jombang",
+  waNumber: "6281234567890", // Ganti dengan nomor asli
+  address: "Jl. KH. Wahid Hasyim No.XXX, Jombang, Jawa Timur",
+  hours: "Senin - Sabtu: 08.00 - 20.00 WIB",
+  email: "info@sidodadikomputer.com"
+};
+
+const CATEGORIES = [
+  { id: 'laptop', name: 'Laptop', icon: Laptop },
+  { id: 'pc', name: 'PC / Desktop', icon: Monitor },
+  { id: 'monitor', name: 'Monitor', icon: Monitor },
+  { id: 'printer', name: 'Printer', icon: Printer },
+  { id: 'accessories', name: 'Accessories', icon: Keyboard },
+  { id: 'storage', name: 'Storage', icon: HardDrive },
+];
+
+const BRANDS = ['ASUS', 'Acer', 'Lenovo', 'HP', 'MSI', 'Axioo', 'Epson', 'Canon'];
+
+const PRODUCTS = [
+  {
+    id: 'p1',
+    name: 'ASUS ROG Strix G15 (2026)',
+    brand: 'ASUS',
+    category: 'laptop',
+    needs: ['Gaming', 'Desain Grafis', 'Programming'],
+    price: 18499000,
+    promoPrice: 17999000,
+    cashback: 500000,
+    stock: 'Ready Stock',
+    rating: 4.9,
+    image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: 'Intel Core i7-13700H',
+      ram: '16GB DDR5',
+      storage: '1TB NVMe Gen4 SSD',
+      display: '15.6" FHD 165Hz',
+      gpu: 'NVIDIA RTX 4060 8GB',
+      os: 'Windows 11 Home + OHS',
+      garansi: '2 Tahun Resmi ASUS'
+    }
+  },
+  {
+    id: 'p2',
+    name: 'Lenovo IdeaPad Slim 3i',
+    brand: 'Lenovo',
+    category: 'laptop',
+    needs: ['Pelajar', 'Mahasiswa', 'Kantoran'],
+    price: 7499000,
+    promoPrice: 6999000,
+    cashback: 200000,
+    stock: 'Ready Stock',
+    rating: 4.7,
+    image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: 'Intel Core i3-1215U',
+      ram: '8GB DDR4',
+      storage: '512GB NVMe SSD',
+      display: '14" FHD IPS',
+      gpu: 'Intel UHD Graphics',
+      os: 'Windows 11 Home + OHS',
+      garansi: '2 Tahun Resmi Lenovo'
+    }
+  },
+  {
+    id: 'p3',
+    name: 'Acer Swift Go 14 OLED',
+    brand: 'Acer',
+    category: 'laptop',
+    needs: ['Kantoran', 'Bisnis', 'Desain Grafis'],
+    price: 12999000,
+    promoPrice: 12499000,
+    cashback: null,
+    stock: 'Terbatas',
+    rating: 4.8,
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: 'Intel Core i5-13500H',
+      ram: '16GB LPDDR5',
+      storage: '512GB NVMe Gen4 SSD',
+      display: '14" 2.8K OLED 90Hz',
+      gpu: 'Intel Iris Xe Graphics',
+      os: 'Windows 11 Home + OHS',
+      garansi: '3 Tahun Resmi Acer'
+    }
+  },
+  {
+    id: 'p4',
+    name: 'HP Victus 15 Gaming',
+    brand: 'HP',
+    category: 'laptop',
+    needs: ['Gaming', 'Programming'],
+    price: 13500000,
+    promoPrice: 12999000,
+    cashback: 300000,
+    stock: 'Ready Stock',
+    rating: 4.6,
+    image: 'https://images.unsplash.com/photo-1587614382346-4ec70e388b28?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: 'AMD Ryzen 5 7535HS',
+      ram: '16GB DDR5',
+      storage: '512GB NVMe SSD',
+      display: '15.6" FHD 144Hz',
+      gpu: 'NVIDIA RTX 2050 4GB',
+      os: 'Windows 11 Home + OHS',
+      garansi: '2 Tahun Resmi HP'
+    }
+  },
+  {
+    id: 'p5',
+    name: 'Epson EcoTank L3210',
+    brand: 'Epson',
+    category: 'printer',
+    needs: ['Pelajar', 'Kantoran'],
+    price: 2450000,
+    promoPrice: 2350000,
+    cashback: 50000,
+    stock: 'Ready Stock',
+    rating: 4.9,
+    image: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: '-',
+      ram: '-',
+      storage: '-',
+      display: '-',
+      gpu: '-',
+      os: 'Windows & Mac',
+      garansi: '2 Tahun / 30.000 Cetak'
+    }
+  },
+  {
+    id: 'p6',
+    name: 'LG 24MP400 24" IPS Monitor',
+    brand: 'LG',
+    category: 'monitor',
+    needs: ['Kantoran', 'Desain Grafis'],
+    price: 1550000,
+    promoPrice: 1450000,
+    cashback: null,
+    stock: 'Ready Stock',
+    rating: 4.7,
+    image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: '-',
+      ram: '-',
+      storage: '-',
+      display: '23.8" FHD IPS 75Hz',
+      gpu: '-',
+      os: '-',
+      garansi: '1 Tahun Resmi LG'
+    }
+  },
+  {
+    id: 'p7',
+    name: 'Axioo Pongo 760',
+    brand: 'Axioo',
+    category: 'laptop',
+    needs: ['Gaming', 'Programming'],
+    price: 15999000,
+    promoPrice: 15499000,
+    cashback: 500000,
+    stock: 'Pre-Order',
+    rating: 4.5,
+    image: 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: 'Intel Core i7-12650H',
+      ram: '16GB DDR4',
+      storage: '512GB NVMe SSD',
+      display: '15.6" FHD 144Hz',
+      gpu: 'NVIDIA RTX 4060 8GB',
+      os: 'Windows 11 Pro',
+      garansi: '3 Tahun Resmi Axioo'
+    }
+  },
+  {
+    id: 'p8',
+    name: 'Logitech MX Master 3S',
+    brand: 'Logitech',
+    category: 'accessories',
+    needs: ['Bisnis', 'Desain Grafis'],
+    price: 1699000,
+    promoPrice: 1599000,
+    cashback: null,
+    stock: 'Ready Stock',
+    rating: 5.0,
+    image: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c3f81?auto=format&fit=crop&w=500&q=80',
+    specs: {
+      processor: '-',
+      ram: '-',
+      storage: '-',
+      display: '-',
+      gpu: '-',
+      os: 'Windows, Mac, Linux',
+      garansi: '1 Tahun Resmi Logitech'
+    }
+  }
+];
+
+const ARTICLES = [
+  { id: 1, title: 'Laptop 5 Jutaan Terbaik untuk Pelajar 2026', date: '12 Sep 2026', image: 'https://images.unsplash.com/photo-1503694978374-8a2fa686963a?auto=format&fit=crop&w=400&q=80' },
+  { id: 2, title: 'Cara Memilih Laptop Sesuai Kebutuhan', date: '08 Sep 2026', image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80' },
+  { id: 3, title: 'SSD 256GB vs 512GB: Mana yang Cocok Untukmu?', date: '01 Sep 2026', image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=400&q=80' },
+];
+
+// ==========================================
+// UTILS
+// ==========================================
+const formatRupiah = (number) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+};
+
+const generateWAMessage = (type, data) => {
+  let message = `Halo Admin Sidodadi Komputer, saya ingin bertanya.`;
+  if (type === 'product' && data) {
+    message = `Halo Sidodadi Komputer, saya tertarik dengan produk *${data.name}* yang ada di website. Apakah stoknya masih tersedia?`;
+  } else if (type === 'service') {
+    message = `Halo Sidodadi Komputer, saya ingin konsultasi mengenai service perangkat saya.`;
+  }
+  return `https://wa.me/${STORE_INFO.waNumber}?text=${encodeURIComponent(message)}`;
+};
+
+const trackEvent = (eventName, data) => {
+  // Simulasi tracking Google Analytics / Pixel
+  console.log(`[TRACKING EVENT]: ${eventName}`, data || '');
+};
+
+// ==========================================
+// COMPONENTS
+// ==========================================
+const Button = ({ children, variant = 'primary', className = '', href, onClick, ...props }) => {
+  const baseStyle = "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 ease-out";
+  const variants = {
+    primary: "bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg",
+    secondary: "bg-slate-900 text-white hover:bg-slate-800",
+    outline: "border-2 border-slate-200 text-slate-700 hover:border-red-600 hover:text-red-600",
+    ghost: "text-slate-600 hover:bg-slate-100",
+    whatsapp: "bg-[#25D366] text-white hover:bg-[#20bd5a] shadow-md hover:shadow-lg"
+  };
+  
+  const sizeStyle = props.size === 'sm' ? 'px-3 py-1.5 text-sm' : 'px-5 py-2.5';
+  const classes = `${baseStyle} ${variants[variant]} ${sizeStyle} ${className}`;
+
+  if (href) {
+    return <a href={href} className={classes} target={href.startsWith('http') ? '_blank' : '_self'} rel="noreferrer" onClick={onClick}>{children}</a>;
+  }
+  return <button className={classes} onClick={onClick} {...props}>{children}</button>;
+};
+
+const ProductCard = ({ product, onViewDetail, onAddCompare }) => (
+  <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_20px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full">
+    <div className="relative aspect-square mb-4 bg-slate-50 rounded-xl overflow-hidden flex items-center justify-center">
+      <img src={product.image} alt={product.name} className="object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-500" />
+      {product.cashback && (
+        <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center">
+          <Zap size={12} className="mr-1"/> Cashback
+        </div>
+      )}
+      <div className="absolute top-2 right-2 bg-white/90 backdrop-blur text-slate-700 text-xs font-semibold px-2 py-1 rounded-md border border-slate-200">
+        {product.stock}
+      </div>
+    </div>
+    
+    <div className="flex-grow flex flex-col">
+      <div className="text-xs text-slate-500 mb-1 flex justify-between items-center">
+        <span>{product.brand}</span>
+        <span className="flex items-center text-yellow-500"><Star size={12} className="fill-current mr-0.5"/> {product.rating}</span>
+      </div>
+      <h3 className="font-bold text-slate-900 leading-tight mb-2 line-clamp-2 cursor-pointer hover:text-red-600 transition-colors" onClick={() => onViewDetail(product)}>
+        {product.name}
+      </h3>
+      
+      <div className="text-xs text-slate-500 mb-3 space-y-1 line-clamp-2">
+        {product.specs.processor && <p>• {product.specs.processor}</p>}
+        {product.specs.ram && <p>• {product.specs.ram} | {product.specs.storage}</p>}
+      </div>
+
+      <div className="mt-auto">
+        {product.promoPrice ? (
+          <div>
+            <p className="text-xs text-slate-400 line-through">{formatRupiah(product.price)}</p>
+            <p className="text-lg font-bold text-red-600">{formatRupiah(product.promoPrice)}</p>
+          </div>
+        ) : (
+          <p className="text-lg font-bold text-slate-900">{formatRupiah(product.price)}</p>
+        )}
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100">
+      <Button variant="outline" size="sm" onClick={() => onViewDetail(product)}>Detail</Button>
+      <Button variant="whatsapp" size="sm" href={generateWAMessage('product', product)} onClick={() => trackEvent('click_wa_product', product.name)}>
+        Beli WA
+      </Button>
+    </div>
+    <button 
+      onClick={() => onAddCompare(product)}
+      className="mt-2 text-xs text-center text-slate-500 hover:text-slate-900 w-full py-1 flex items-center justify-center gap-1"
+    >
+      <Scale size={14} /> Bandingkan
+    </button>
+  </div>
+);
+
+// ==========================================
+// VIEWS
+// ==========================================
+
+const HomeView = ({ navigate, onAddCompare }) => {
+  const heroBanners = [
+    { title: "Laptop Terbaru, Harga Terbaik", sub: "Laptop, PC, Printer, dan Accessories untuk segala kebutuhan.", color: "bg-slate-900" },
+    { title: "Promo Khusus Mahasiswa", sub: "Diskon up to 1 Juta + Free Mouse Wireless.", color: "bg-blue-900" },
+    { title: "PC Rakitan Gaming & Creator", sub: "Konsultasi gratis, rakit sesuai budgetmu.", color: "bg-red-900" }
+  ];
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentSlide(c => (c + 1) % heroBanners.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="animate-in fade-in duration-500">
+      {/* Hero Carousel */}
+      <section className="relative bg-slate-900 text-white overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-40">
+          <img src="https://images.unsplash.com/photo-1531297172864-fd222104cbd0?auto=format&fit=crop&w=1600&q=80" alt="Tech Background" className="w-full h-full object-cover" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-24 md:py-32 flex flex-col md:flex-row items-center">
+          <div className="md:w-2/3">
+            <span className="inline-block py-1 px-3 rounded-full bg-red-600 text-xs font-bold tracking-wider mb-4 animate-bounce">PROMO BULAN INI</span>
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 leading-tight transition-all duration-300">
+              {heroBanners[currentSlide].title}
+            </h1>
+            <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl">
+              {heroBanners[currentSlide].sub}
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button onClick={() => navigate('catalog')}>Lihat Produk <ArrowRight size={18} className="ml-2"/></Button>
+              <Button variant="whatsapp" href={generateWAMessage('general')}>Chat WhatsApp</Button>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
+          {heroBanners.map((_, idx) => (
+            <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-3 h-3 rounded-full transition-all ${currentSlide === idx ? 'bg-red-600 w-8' : 'bg-white/50 hover:bg-white'}`} />
+          ))}
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {CATEGORIES.map(cat => {
+              const Icon = cat.icon;
+              return (
+                <div key={cat.id} onClick={() => { navigate('catalog'); window.scrollTo(0,0); }} className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors group">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                    <Icon size={24} className="text-slate-700 group-hover:text-red-600" />
+                  </div>
+                  <span className="text-sm font-semibold text-center">{cat.name}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Promo Section */}
+      <section className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
+                <Tag className="text-red-600"/> Promo Spesial
+              </h2>
+              <p className="text-slate-500 mt-2">Penawaran terbaik minggu ini, jangan sampai kehabisan!</p>
+            </div>
+            <Button variant="ghost" onClick={() => navigate('promo')} className="hidden md:flex">Lihat Semua</Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {PRODUCTS.slice(0, 4).map(product => (
+              <ProductCard key={product.id} product={product} onViewDetail={(p) => navigate('detail', { product: p })} onAddCompare={onAddCompare} />
+            ))}
+          </div>
+          <Button variant="outline" className="w-full mt-6 md:hidden" onClick={() => navigate('promo')}>Lihat Semua Promo</Button>
+        </div>
+      </section>
+
+      {/* Shop by Needs */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center text-slate-900 mb-10">Cari Sesuai Kebutuhanmu</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {['Pelajar', 'Kantoran', 'Gaming', 'Desain Grafis'].map((need, idx) => (
+              <div key={idx} onClick={() => navigate('catalog')} className="relative h-40 rounded-2xl overflow-hidden cursor-pointer group">
+                <img src={`https://source.unsplash.com/random/400x300/?${need.toLowerCase()},computer`} alt={need} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 grayscale-[30%] group-hover:grayscale-0" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent flex items-end p-6">
+                  <h3 className="text-white font-bold text-lg group-hover:text-red-400 transition-colors">Laptop {need}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us */}
+      <section className="py-16 bg-slate-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <ShieldCheck size={48} className="mx-auto text-red-500 mb-4"/>
+              <h3 className="font-bold text-lg mb-2">Produk Original</h3>
+              <p className="text-slate-400 text-sm">100% Original & Bergaransi Resmi</p>
+            </div>
+            <div className="text-center">
+              <Tag size={48} className="mx-auto text-red-500 mb-4"/>
+              <h3 className="font-bold text-lg mb-2">Harga Kompetitif</h3>
+              <p className="text-slate-400 text-sm">Harga terbaik di Jombang & sekitarnya</p>
+            </div>
+            <div className="text-center">
+              <Wrench size={48} className="mx-auto text-red-500 mb-4"/>
+              <h3 className="font-bold text-lg mb-2">Dukungan Service</h3>
+              <p className="text-slate-400 text-sm">Teknisi handal untuk perbaikan & upgrade</p>
+            </div>
+            <div className="text-center">
+              <MessageCircle size={48} className="mx-auto text-red-500 mb-4"/>
+              <h3 className="font-bold text-lg mb-2">Konsultasi Gratis</h3>
+              <p className="text-slate-400 text-sm">Bantu pilih sesuai kebutuhan & budget</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Brands */}
+      <section className="py-12 border-b border-slate-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-sm font-semibold text-slate-400 mb-6 uppercase tracking-wider">Brand Partner Tersedia</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60">
+             {BRANDS.map(brand => (
+               <span key={brand} className="text-xl md:text-2xl font-bold text-slate-500 hover:text-slate-900 hover:scale-110 transition-all cursor-pointer">{brand}</span>
+             ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const CatalogView = ({ navigate, onAddCompare }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [sortBy, setSortBy] = useState('terbaru');
+
+  // Simple filtering logic
+  const filteredProducts = PRODUCTS.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  }).sort((a, b) => {
+    if(sortBy === 'termurah') return (a.promoPrice || a.price) - (b.promoPrice || b.price);
+    if(sortBy === 'termahal') return (b.promoPrice || b.price) - (a.promoPrice || a.price);
+    return 0; // Default / terbaru
+  });
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in">
+      {/* Breadcrumb */}
+      <div className="text-sm text-slate-500 mb-6 flex items-center gap-2">
+        <span className="cursor-pointer hover:text-red-600" onClick={() => navigate('home')}>Home</span>
+        <ChevronRight size={14}/>
+        <span className="text-slate-900 font-medium">Katalog Produk</span>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar Filters (Simplified for Demo) */}
+        <div className="w-full md:w-64 flex-shrink-0">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 sticky top-24">
+            <h3 className="font-bold text-lg mb-4 pb-4 border-b border-slate-100">Filter Produk</h3>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-semibold mb-3 text-slate-700">Kategori</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="cat" checked={activeCategory === 'All'} onChange={() => setActiveCategory('All')} className="text-red-600 focus:ring-red-500"/>
+                  <span className="text-sm text-slate-600">Semua Produk</span>
+                </label>
+                {CATEGORIES.map(cat => (
+                  <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="cat" checked={activeCategory === cat.id} onChange={() => setActiveCategory(cat.id)} className="text-red-600 focus:ring-red-500"/>
+                    <span className="text-sm text-slate-600">{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <Button variant="outline" className="w-full text-sm" onClick={() => {setActiveCategory('All'); setSearchTerm('');}}>Reset Filter</Button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20}/>
+              <input 
+                type="text" 
+                placeholder="Cari laptop, printer, dll..." 
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white shadow-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <span className="text-sm text-slate-500 whitespace-nowrap">Urutkan:</span>
+              <select 
+                className="border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500 w-full"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="terbaru">Terbaru & Populer</option>
+                <option value="termurah">Harga Termurah</option>
+                <option value="termahal">Harga Tertinggi</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mb-4 text-sm text-slate-500">
+            Menampilkan {filteredProducts.length} produk {searchTerm && `untuk pencarian "${searchTerm}"`}
+          </div>
+
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              {filteredProducts.map(product => (
+                <ProductCard key={product.id} product={product} onViewDetail={(p) => navigate('detail', { product: p })} onAddCompare={onAddCompare} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-white rounded-2xl border border-slate-100">
+              <Search className="mx-auto text-slate-300 mb-4" size={48}/>
+              <h3 className="text-lg font-bold text-slate-700">Produk tidak ditemukan</h3>
+              <p className="text-slate-500">Coba ubah kata kunci atau filter pencarian Anda.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductDetailView = ({ product, navigate }) => {
+  if (!product) return <div>Loading...</div>;
+
+  return (
+    <div className="bg-slate-50 min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Breadcrumb */}
+        <div className="text-sm text-slate-500 mb-6 flex items-center gap-2">
+          <span className="cursor-pointer hover:text-red-600" onClick={() => navigate('home')}>Home</span>
+          <ChevronRight size={14}/>
+          <span className="cursor-pointer hover:text-red-600" onClick={() => navigate('catalog')}>Produk</span>
+          <ChevronRight size={14}/>
+          <span className="text-slate-900 font-medium truncate w-48 md:w-auto">{product.name}</span>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-10">
+          
+          {/* Left: Images */}
+          <div className="w-full md:w-2/5">
+            <div className="aspect-square rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-center p-8 relative">
+               <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
+               {product.cashback && (
+                  <div className="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg flex items-center">
+                    <Zap size={16} className="mr-1"/> Cashback {formatRupiah(product.cashback)}
+                  </div>
+               )}
+            </div>
+          </div>
+
+          {/* Right: Info */}
+          <div className="w-full md:w-3/5 flex flex-col">
+            <div className="mb-2 flex items-center gap-3">
+              <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{product.brand}</span>
+              <span className="flex items-center text-yellow-500 text-sm"><Star size={16} className="fill-current mr-1"/> {product.rating}</span>
+            </div>
+            
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 leading-tight">{product.name}</h1>
+            
+            <div className="mb-6 pb-6 border-b border-slate-100">
+               {product.promoPrice ? (
+                 <div>
+                   <p className="text-slate-400 line-through text-lg mb-1">{formatRupiah(product.price)}</p>
+                   <p className="text-4xl font-black text-red-600">{formatRupiah(product.promoPrice)}</p>
+                 </div>
+               ) : (
+                 <p className="text-4xl font-black text-slate-900">{formatRupiah(product.price)}</p>
+               )}
+               <p className="mt-3 inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-green-100 text-green-800">
+                  <CheckCircle size={16} className="mr-1.5"/> {product.stock}
+               </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-y-4 gap-x-8 mb-8">
+              {Object.entries(product.specs).slice(0,4).map(([key, value]) => (
+                <div key={key}>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{key}</p>
+                  <p className="text-sm font-semibold text-slate-900">{value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-auto flex flex-col sm:flex-row gap-4">
+              <Button 
+                variant="whatsapp" 
+                className="flex-1 text-lg py-4"
+                href={generateWAMessage('product', product)}
+                onClick={() => trackEvent('click_wa_detail', product.name)}
+              >
+                Beli via WhatsApp Sekarang
+              </Button>
+            </div>
+            
+            <div className="mt-6 bg-slate-50 rounded-xl p-4 flex gap-4 text-sm text-slate-600">
+               <div className="flex items-center gap-2"><ShieldCheck className="text-slate-400" size={18}/> Garansi Resmi</div>
+               <div className="flex items-center gap-2"><CheckCircle className="text-slate-400" size={18}/> Produk Original 100%</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Full Specs Table */}
+        <div className="mt-10 bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-100">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Spesifikasi Lengkap</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <tbody>
+                {Object.entries(product.specs).map(([key, value], idx) => (
+                  <tr key={key} className={idx % 2 === 0 ? 'bg-slate-50' : 'bg-white'}>
+                    <td className="py-4 px-4 font-medium text-slate-500 uppercase w-1/3 border-b border-slate-100">{key}</td>
+                    <td className="py-4 px-4 text-slate-900 font-semibold border-b border-slate-100">{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+const CompareView = ({ list, onRemove, navigate }) => {
+  if (list.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-20 text-center animate-in fade-in">
+        <Scale size={64} className="mx-auto text-slate-300 mb-6"/>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Belum Ada Produk Dibandingkan</h2>
+        <p className="text-slate-500 mb-8">Pilih hingga 3 produk dari katalog untuk membandingkan spesifikasi.</p>
+        <Button onClick={() => navigate('catalog')}>Kembali ke Katalog</Button>
+      </div>
+    );
+  }
+
+  const specKeys = ['processor', 'ram', 'storage', 'display', 'gpu', 'os', 'garansi'];
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-in fade-in">
+      <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+        <Scale className="text-red-600"/> Bandingkan Produk
+      </h2>
+
+      <div className="overflow-x-auto pb-4">
+        <table className="w-full min-w-[800px] border-collapse bg-white rounded-2xl shadow-sm overflow-hidden">
+          <thead>
+            <tr>
+              <th className="p-4 bg-slate-50 border-b border-slate-200 w-48 text-left text-slate-500">Produk</th>
+              {list.map(p => (
+                <th key={p.id} className="p-4 border-b border-slate-200 text-center align-top w-64 relative group">
+                  <button onClick={() => onRemove(p.id)} className="absolute top-2 right-2 text-slate-400 hover:text-red-600 bg-white rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    <XCircle size={20}/>
+                  </button>
+                  <img src={p.image} alt={p.name} className="h-32 object-contain mx-auto mb-4" />
+                  <h3 className="font-bold text-slate-900 text-sm leading-tight mb-2 h-10">{p.name}</h3>
+                  <p className="text-red-600 font-bold mb-4">{formatRupiah(p.promoPrice || p.price)}</p>
+                  <Button variant="whatsapp" size="sm" className="w-full text-xs" href={generateWAMessage('product', p)}>Tanya Stok</Button>
+                </th>
+              ))}
+              {/* Empty slots placeholders if < 3 */}
+              {Array.from({ length: 3 - list.length }).map((_, i) => (
+                <th key={`empty-${i}`} className="p-4 border-b border-slate-200 text-center bg-slate-50 border-dashed border-l-2 align-middle">
+                   <div className="text-slate-400 text-sm flex flex-col items-center">
+                     <span className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center mb-2">+</span>
+                     Tambah Produk
+                   </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {specKeys.map((key, idx) => (
+              <tr key={key} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                <td className="p-4 border-b border-slate-100 font-medium text-slate-500 uppercase text-xs tracking-wider">{key}</td>
+                {list.map(p => (
+                  <td key={p.id} className="p-4 border-b border-slate-100 text-center text-sm font-medium text-slate-800">
+                    {p.specs[key] || '-'}
+                  </td>
+                ))}
+                 {Array.from({ length: 3 - list.length }).map((_, i) => (
+                  <td key={`empty-cell-${i}`} className="p-4 border-b border-slate-100 border-l-2 border-dashed bg-slate-50"></td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+const ServiceView = () => (
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in">
+    <div className="text-center max-w-3xl mx-auto mb-16">
+      <h1 className="text-4xl font-extrabold text-slate-900 mb-6">Service Komputer & Laptop Jombang</h1>
+      <p className="text-lg text-slate-600">Teknisi berpengalaman, pengerjaan cepat, dan bergaransi. Solusi tepat untuk segala kerusakan perangkat Anda.</p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      {[
+        { title: 'Service Laptop Mati Total', desc: 'Perbaikan motherboard, reball chipset, ganti IC.', icon: Laptop },
+        { title: 'Upgrade SSD & RAM', desc: 'Bikin laptop lemot jadi ngebut kembali. Proses cepat bisa ditunggu.', icon: HardDrive },
+        { title: 'Install Windows & Software', desc: 'Instalasi OS Windows 10/11 original dan software kebutuhan harian.', icon: Monitor },
+        { title: 'Cleaning & Pasta Thermal', desc: 'Pembersihan debu dan penggantian pasta agar suhu tetap dingin.', icon: Wrench },
+        { title: 'Service Printer', desc: 'Mengatasi paper jam, hasil print putus, ganti head, reset.', icon: Printer },
+        { title: 'Maintenance Perusahaan', desc: 'Kontrak maintenance berkala untuk kantor & instansi.', icon: ShieldCheck }
+      ].map((svc, idx) => {
+        const Icon = svc.icon;
+        return (
+          <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col items-start">
+             <div className="w-14 h-14 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mb-6">
+                <Icon size={28}/>
+             </div>
+             <h3 className="text-xl font-bold text-slate-900 mb-3">{svc.title}</h3>
+             <p className="text-slate-500 mb-6 flex-grow">{svc.desc}</p>
+             <Button variant="outline" className="w-full mt-auto" onClick={() => window.open(generateWAMessage('service'), '_blank')}>Konsultasi Gratis</Button>
+          </div>
+        )
+      })}
+    </div>
+
+    <div className="bg-slate-900 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+      <div className="relative z-10">
+        <h2 className="text-3xl font-bold mb-4">Laptop Kamu Rusak?</h2>
+        <p className="text-slate-300 mb-8 max-w-2xl mx-auto">Jangan biarkan kerjaan numpuk karena perangkat bermasalah. Segera bawa ke Sidodadi Komputer atau konsultasikan via WhatsApp sekarang.</p>
+        <Button variant="whatsapp" size="lg" href={generateWAMessage('service')} className="text-lg px-8 py-4">Hubungi Teknisi Kami</Button>
+      </div>
+    </div>
+  </div>
+);
+
+const LocationView = () => (
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in">
+    <h1 className="text-3xl font-bold text-slate-900 mb-8 text-center">Lokasi & Kontak</h1>
+    
+    <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        <div className="p-8 md:p-12 flex flex-col justify-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">{STORE_INFO.name}</h2>
+          
+          <div className="space-y-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="bg-slate-100 p-3 rounded-full text-slate-700 shrink-0"><MapIcon size={20}/></div>
+              <div>
+                <p className="font-semibold text-slate-900">Alamat Toko</p>
+                <p className="text-slate-600">{STORE_INFO.address}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="bg-slate-100 p-3 rounded-full text-slate-700 shrink-0"><Clock size={20}/></div>
+              <div>
+                <p className="font-semibold text-slate-900">Jam Operasional</p>
+                <p className="text-slate-600">{STORE_INFO.hours}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="bg-slate-100 p-3 rounded-full text-slate-700 shrink-0"><Phone size={20}/></div>
+              <div>
+                <p className="font-semibold text-slate-900">WhatsApp / Telepon</p>
+                <p className="text-slate-600">+{STORE_INFO.waNumber}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-4">
+            <Button variant="primary" onClick={() => window.open('https://maps.google.com/?q=' + encodeURIComponent(STORE_INFO.address), '_blank')}>
+              Buka di Google Maps
+            </Button>
+            <Button variant="outline" href={`mailto:${STORE_INFO.email}`}>Email Kami</Button>
+          </div>
+        </div>
+        
+        {/* Placeholder for Map - Using an image as iframe map embed requires specific API keys or exact coordinates usually, a static map image is safer for demo */}
+        <div className="bg-slate-200 h-96 md:h-auto relative">
+           <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80" alt="Map Location Placeholder" className="w-full h-full object-cover" />
+           <div className="absolute inset-0 bg-slate-900/20 flex items-center justify-center">
+              <div className="bg-white p-4 rounded-xl shadow-lg text-center">
+                 <MapPin className="text-red-600 mx-auto mb-2" size={32}/>
+                 <p className="font-bold text-slate-900">{STORE_INFO.name}</p>
+              </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+
+// ==========================================
+// MAIN APP COMPONENT
+// ==========================================
+export default function App() {
+  const [view, setView] = useState('home');
+  const [viewData, setViewData] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [compareList, setCompareList] = useState([]);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Handle Scroll for sticky navbar shadow
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navigate = (newView, data = null) => {
+    setView(newView);
+    setViewData(data);
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Simulate SEO Title Change
+    const titles = {
+      home: `${STORE_INFO.name} | Toko Komputer Terlengkap`,
+      catalog: `Katalog Produk | ${STORE_INFO.name}`,
+      detail: data?.product ? `${data.product.name} | ${STORE_INFO.name}` : STORE_INFO.name,
+      service: `Pusat Service Komputer | ${STORE_INFO.name}`,
+      location: `Lokasi Toko | ${STORE_INFO.name}`,
+      compare: `Bandingkan Produk | ${STORE_INFO.name}`,
+    };
+    document.title = titles[newView] || STORE_INFO.name;
+  };
+
+  const handleAddCompare = (product) => {
+    if (compareList.find(p => p.id === product.id)) return;
+    if (compareList.length >= 3) {
+      alert("Maksimal membandingkan 3 produk. Hapus salah satu terlebih dahulu.");
+      return;
+    }
+    setCompareList([...compareList, product]);
+    navigate('compare');
+  };
+
+  const handleRemoveCompare = (id) => {
+    setCompareList(compareList.filter(p => p.id !== id));
+  };
+
+  const navLinks = [
+    { name: 'Home', view: 'home' },
+    { name: 'Produk', view: 'catalog' },
+    { name: 'Promo', view: 'promo' },
+    { name: 'Service', view: 'service' },
+    { name: 'Artikel', view: 'artikel' },
+    { name: 'Lokasi', view: 'location' },
+  ];
+
+  return (
+    <div className="font-sans text-slate-800 bg-slate-50 min-h-screen flex flex-col selection:bg-red-200 selection:text-red-900">
+      
+      {/* Top Bar */}
+      <div className="bg-slate-900 text-slate-300 py-2 px-4 text-xs md:text-sm hidden md:block">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex gap-4">
+            <span className="flex items-center gap-1"><MapPin size={14}/> {STORE_INFO.address}</span>
+            <span className="flex items-center gap-1"><Clock size={14}/> {STORE_INFO.hours}</span>
+          </div>
+          <div className="flex gap-4 items-center">
+            <span className="text-red-400 font-bold animate-pulse">🔥 Promo Cashback s/d 1 Juta!</span>
+            <a href={`https://wa.me/${STORE_INFO.waNumber}`} target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1">
+              <Phone size={14}/> +{STORE_INFO.waNumber}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Navbar */}
+      <nav className={`sticky top-0 z-50 bg-white transition-all duration-300 ${isScrolled ? 'shadow-md py-3' : 'border-b border-slate-100 py-4'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          
+          {/* Logo */}
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('home')}>
+            <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-sm">
+              S
+            </div>
+            <div className="hidden sm:block">
+              <h1 className="font-bold text-xl text-slate-900 leading-none tracking-tight">Sidodadi<span className="text-red-600">.</span></h1>
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-0.5">Komputer Jombang</p>
+            </div>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center gap-8 font-medium text-sm text-slate-600">
+            {navLinks.map(link => (
+              <button 
+                key={link.view} 
+                onClick={() => navigate(link.view)}
+                className={`hover:text-red-600 transition-colors ${view === link.view ? 'text-red-600 font-bold border-b-2 border-red-600 pb-1 -mb-1' : ''}`}
+              >
+                {link.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-3 md:gap-4">
+            <button onClick={() => navigate('compare')} className="relative p-2 text-slate-500 hover:text-red-600 transition-colors hidden sm:block" title="Bandingkan Produk">
+              <Scale size={20} />
+              {compareList.length > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                  {compareList.length}
+                </span>
+              )}
+            </button>
+            <button onClick={() => navigate('catalog')} className="p-2 text-slate-500 hover:text-red-600 transition-colors" title="Cari Produk">
+              <Search size={20} />
+            </button>
+            
+            <Button variant="whatsapp" className="hidden sm:flex gap-2" href={generateWAMessage('general')}>
+              <MessageCircle size={18}/> Chat Admin
+            </Button>
+
+            {/* Mobile Toggle */}
+            <button className="lg:hidden p-2 text-slate-900" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X size={24}/> : <Menu size={24}/>}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 top-[72px] bg-white z-40 animate-in slide-in-from-top-2 p-4 flex flex-col h-[calc(100vh-72px)]">
+          <div className="flex flex-col gap-4 text-lg font-semibold text-slate-700">
+            {navLinks.map(link => (
+              <button 
+                key={link.view} 
+                onClick={() => navigate(link.view)}
+                className={`text-left py-3 px-4 rounded-xl ${view === link.view ? 'bg-red-50 text-red-600' : 'hover:bg-slate-50'}`}
+              >
+                {link.name}
+              </button>
+            ))}
+            <button onClick={() => navigate('compare')} className="text-left py-3 px-4 rounded-xl flex items-center justify-between hover:bg-slate-50">
+              Bandingkan Produk 
+              <span className="bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-sm">{compareList.length}</span>
+            </button>
+          </div>
+          <div className="mt-auto pb-8">
+            <Button variant="whatsapp" className="w-full justify-center py-4 text-lg" href={generateWAMessage('general')}>
+              Hubungi via WhatsApp
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <main className="flex-grow">
+        {view === 'home' && <HomeView navigate={navigate} onAddCompare={handleAddCompare} />}
+        {view === 'catalog' && <CatalogView navigate={navigate} onAddCompare={handleAddCompare} />}
+        {view === 'detail' && <ProductDetailView product={viewData?.product} navigate={navigate} />}
+        {view === 'compare' && <CompareView list={compareList} onRemove={handleRemoveCompare} navigate={navigate} />}
+        {view === 'service' && <ServiceView />}
+        {view === 'location' && <LocationView />}
+        
+        {/* Placeholder for other views */}
+        {['promo', 'artikel', 'tentang'].includes(view) && (
+          <div className="flex flex-col items-center justify-center py-32 text-center px-4">
+            <Wrench size={64} className="text-slate-300 mb-6"/>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Halaman Sedang Dikembangkan</h2>
+            <p className="text-slate-500 mb-6">Halaman {view.charAt(0).toUpperCase() + view.slice(1)} akan segera hadir.</p>
+            <Button onClick={() => navigate('home')}>Kembali ke Home</Button>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-slate-950 text-slate-400 pt-16 pb-8 border-t-4 border-red-600 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white font-black text-lg">S</div>
+                <h2 className="font-bold text-xl text-white tracking-tight">Sidodadi.</h2>
+              </div>
+              <p className="text-sm leading-relaxed mb-6">
+                Toko komputer dan laptop terlengkap di Jombang. Melayani penjualan, rakit PC, service, dan upgrade dengan harga terbaik dan bergaransi.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors"><Instagram size={18}/></a>
+                <a href="#" className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors"><Facebook size={18}/></a>
+                <a href="#" className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors"><Youtube size={18}/></a>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-white font-bold mb-6 tracking-wide">Menu Cepat</h3>
+              <ul className="space-y-3 text-sm">
+                <li><button onClick={() => navigate('catalog')} className="hover:text-red-400 transition-colors">Katalog Produk</button></li>
+                <li><button onClick={() => navigate('promo')} className="hover:text-red-400 transition-colors">Promo & Diskon</button></li>
+                <li><button onClick={() => navigate('service')} className="hover:text-red-400 transition-colors">Service & Repair</button></li>
+                <li><button onClick={() => navigate('artikel')} className="hover:text-red-400 transition-colors">Blog & Tips</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-bold mb-6 tracking-wide">Layanan Kami</h3>
+              <ul className="space-y-3 text-sm">
+                <li><span className="hover:text-red-400 transition-colors cursor-pointer">Jual Beli Laptop</span></li>
+                <li><span className="hover:text-red-400 transition-colors cursor-pointer">Rakit PC Gaming</span></li>
+                <li><span className="hover:text-red-400 transition-colors cursor-pointer">Install Ulang Windows</span></li>
+                <li><span className="hover:text-red-400 transition-colors cursor-pointer">Konsultasi IT Kantor</span></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-bold mb-6 tracking-wide">Hubungi Kami</h3>
+              <ul className="space-y-4 text-sm">
+                <li className="flex items-start gap-3">
+                  <MapPin size={18} className="text-red-600 shrink-0 mt-0.5"/>
+                  <span>{STORE_INFO.address}</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Phone size={18} className="text-red-600 shrink-0"/>
+                  <span>+{STORE_INFO.waNumber}</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Mail size={18} className="text-red-600 shrink-0"/>
+                  <span>{STORE_INFO.email}</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+          
+          <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+            <p>&copy; {new Date().getFullYear()} {STORE_INFO.name}. All Rights Reserved.</p>
+            <div className="flex gap-4">
+              <span className="hover:text-white cursor-pointer">Privacy Policy</span>
+              <span className="hover:text-white cursor-pointer">Terms of Service</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* Floating WhatsApp Button */}
+      <a 
+        href={generateWAMessage('general')} 
+        target="_blank" 
+        rel="noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-xl hover:scale-110 hover:bg-[#20bd5a] transition-all duration-300 group flex items-center justify-center"
+        onClick={() => trackEvent('click_floating_wa')}
+        aria-label="Chat WhatsApp"
+      >
+        <MessageCircle size={28} className="animate-pulse" />
+        <span className="absolute right-full mr-4 bg-white text-slate-800 text-sm font-bold px-3 py-1.5 rounded-xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          Butuh Bantuan?
+        </span>
+      </a>
+
+      {/* Global Styles for Animations */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      `}} />
+    </div>
+  );
+}
